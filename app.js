@@ -9,6 +9,201 @@ let timerInterval = null;
 let timerSeconds = 0;
 
 // ===================================
+// PROJECT MANAGEMENT
+// ===================================
+
+let currentProjectId = null;
+let projects = loadProjects();
+
+// Load projects from localStorage
+function loadProjects() {
+    const saved = localStorage.getItem('bookWritingProjects');
+    if (saved) {
+        return JSON.parse(saved);
+    }
+    // Create default project if none exist
+    const defaultProject = {
+        id: generateProjectId(),
+        name: 'My Book',
+        createdAt: Date.now()
+    };
+    return [defaultProject];
+}
+
+// Save projects to localStorage
+function saveProjects() {
+    localStorage.setItem('bookWritingProjects', JSON.stringify(projects));
+}
+
+// Generate unique project ID
+function generateProjectId() {
+    return 'proj_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+}
+
+// Get current project
+function getCurrentProject() {
+    if (!currentProjectId && projects.length > 0) {
+        currentProjectId = localStorage.getItem('currentProjectId') || projects[0].id;
+    }
+    return projects.find(p => p.id === currentProjectId) || projects[0];
+}
+
+// Set current project
+function setCurrentProject(projectId) {
+    currentProjectId = projectId;
+    localStorage.setItem('currentProjectId', projectId);
+
+    // Reload all data for the new project
+    progress = loadProgress();
+    writingContent = loadWritingContent();
+
+    // Update UI
+    updateProjectUI();
+    renderTimeline();
+    updateStats();
+    updateDailyAffirmation();
+
+    if (currentView === 'today') {
+        loadTodayView();
+    } else if (currentView === 'full') {
+        loadFullManuscriptView();
+    } else if (currentView === 'outline') {
+        loadOutlineView();
+    }
+
+    // Close panel
+    toggleProjectPanel();
+}
+
+// Create new project
+function createNewProject() {
+    const input = document.getElementById('newProjectName');
+    const name = input.value.trim();
+
+    if (!name) {
+        input.focus();
+        return;
+    }
+
+    const newProject = {
+        id: generateProjectId(),
+        name: name,
+        createdAt: Date.now()
+    };
+
+    projects.push(newProject);
+    saveProjects();
+
+    // Switch to new project
+    setCurrentProject(newProject.id);
+
+    // Close dialog and clear input
+    hideNewProjectDialog();
+    input.value = '';
+}
+
+// Delete project
+function deleteProject(projectId, event) {
+    event.stopPropagation();
+
+    if (projects.length <= 1) {
+        alert('You must have at least one project.');
+        return;
+    }
+
+    const project = projects.find(p => p.id === projectId);
+    if (!confirm(`Delete "${project.name}"? This will remove all progress and writing for this project.`)) {
+        return;
+    }
+
+    // Remove project data from localStorage
+    localStorage.removeItem(`bookWritingProgress_${projectId}`);
+    localStorage.removeItem(`writingContent_${projectId}`);
+
+    // Remove from projects array
+    projects = projects.filter(p => p.id !== projectId);
+    saveProjects();
+
+    // If we deleted the current project, switch to another
+    if (currentProjectId === projectId) {
+        setCurrentProject(projects[0].id);
+    } else {
+        renderProjectList();
+    }
+}
+
+// Toggle project panel
+function toggleProjectPanel() {
+    const panel = document.getElementById('projectPanel');
+    const selector = document.querySelector('.project-selector');
+
+    panel.classList.toggle('active');
+    selector.classList.toggle('open');
+
+    if (panel.classList.contains('active')) {
+        renderProjectList();
+    }
+}
+
+// Render project list
+function renderProjectList() {
+    const listEl = document.getElementById('projectList');
+    const currentProject = getCurrentProject();
+
+    listEl.innerHTML = projects.map(project => `
+        <div class="project-item ${project.id === currentProject.id ? 'active' : ''}"
+             onclick="setCurrentProject('${project.id}')">
+            <span class="project-item-name">${escapeHtml(project.name)}</span>
+            <button class="project-item-delete" onclick="deleteProject('${project.id}', event)" title="Delete project">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14z"
+                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+        </div>
+    `).join('');
+}
+
+// Update project UI
+function updateProjectUI() {
+    const currentProject = getCurrentProject();
+    document.getElementById('currentProjectName').textContent = currentProject.name;
+}
+
+// Show new project dialog
+function showNewProjectDialog() {
+    document.getElementById('newProjectDialog').classList.add('active');
+    document.getElementById('newProjectName').focus();
+}
+
+// Hide new project dialog
+function hideNewProjectDialog() {
+    document.getElementById('newProjectDialog').classList.remove('active');
+    document.getElementById('newProjectName').value = '';
+}
+
+// Close project panel when clicking outside
+document.addEventListener('click', (e) => {
+    const selector = document.querySelector('.project-selector');
+    const panel = document.getElementById('projectPanel');
+
+    if (selector && !selector.contains(e.target) && panel.classList.contains('active')) {
+        panel.classList.remove('active');
+        selector.classList.remove('open');
+    }
+});
+
+// Handle Enter key in new project input
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && document.getElementById('newProjectDialog').classList.contains('active')) {
+        createNewProject();
+    }
+    if (e.key === 'Escape' && document.getElementById('newProjectDialog').classList.contains('active')) {
+        hideNewProjectDialog();
+    }
+});
+
+// ===================================
 // THEME MANAGEMENT
 // ===================================
 
@@ -101,9 +296,10 @@ document.addEventListener('click', (e) => {
 });
 
 
-// Load saved progress from localStorage
+// Load saved progress from localStorage (project-specific)
 function loadProgress() {
-    const saved = localStorage.getItem('bookWritingProgress');
+    const project = getCurrentProject();
+    const saved = localStorage.getItem(`bookWritingProgress_${project.id}`);
     if (saved) {
         return JSON.parse(saved);
     }
@@ -114,9 +310,10 @@ function loadProgress() {
     };
 }
 
-// Save progress to localStorage
+// Save progress to localStorage (project-specific)
 function saveProgress(progress) {
-    localStorage.setItem('bookWritingProgress', JSON.stringify(progress));
+    const project = getCurrentProject();
+    localStorage.setItem(`bookWritingProgress_${project.id}`, JSON.stringify(progress));
 }
 
 let progress = loadProgress();
@@ -126,6 +323,10 @@ let progress = loadProgress();
 // ===================================
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize project first
+    currentProjectId = localStorage.getItem('currentProjectId') || projects[0].id;
+    updateProjectUI();
+
     applyTheme();
     renderTimeline();
     updateStats();
@@ -796,18 +997,20 @@ let currentView = 'today';
 let writingContent = loadWritingContent();
 let autoSaveTimeout = null;
 
-// Load writing content from localStorage
+// Load writing content from localStorage (project-specific)
 function loadWritingContent() {
-    const saved = localStorage.getItem('writingContent');
+    const project = getCurrentProject();
+    const saved = localStorage.getItem(`writingContent_${project.id}`);
     if (saved) {
         return JSON.parse(saved);
     }
     return {}; // { dayNumber: "content text" }
 }
 
-// Save writing content to localStorage
+// Save writing content to localStorage (project-specific)
 function saveWritingContent() {
-    localStorage.setItem('writingContent', JSON.stringify(writingContent));
+    const project = getCurrentProject();
+    localStorage.setItem(`writingContent_${project.id}`, JSON.stringify(writingContent));
 }
 
 // Switch between workspace views
