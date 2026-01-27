@@ -52,7 +52,7 @@ const timelineData = {
                             duration: "10 minutes"
                         },
                         {
-                            title: "List everything a person needs to know",
+                            title: "List everything a person needs to know or will gain",
                             description: "Use single words or phrases only. Don't worry about order. Just write - no overthinking!",
                             duration: "10 minutes"
                         },
