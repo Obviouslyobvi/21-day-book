@@ -175,59 +175,43 @@ body {
 }
 
 /* ===================================
-   PROJECT SELECTOR
+   PROJECT CONTROLS (matches theme controls)
    =================================== */
 
-.project-selector {
+.project-controls {
     position: fixed;
     top: var(--spacing-lg);
     left: var(--spacing-lg);
     z-index: 1000;
 }
 
-.project-selector-btn {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-xs);
-    padding: var(--spacing-sm) var(--spacing-md);
+.project-toggle-btn {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
     background: var(--color-bg-card);
     border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
     color: var(--color-text-primary);
-    font-size: 0.9375rem;
-    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
     transition: all var(--transition-base);
     box-shadow: var(--shadow-float);
 }
 
-.project-selector-btn:hover {
-    border-color: var(--color-primary);
-    transform: translateY(-2px);
+.project-toggle-btn:hover {
+    transform: translateY(-4px);
     box-shadow: var(--shadow-xl);
-}
-
-.project-selector-btn .project-name {
-    max-width: 200px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.project-selector-btn .chevron {
-    transition: transform var(--transition-fast);
-}
-
-.project-selector.open .project-selector-btn .chevron {
-    transform: rotate(180deg);
+    border-color: var(--color-primary);
 }
 
 .project-panel {
     position: absolute;
-    top: calc(100% + var(--spacing-sm));
+    top: 68px;
     left: 0;
     width: 320px;
-    max-height: 400px;
+    max-height: calc(100vh - 100px);
     background: var(--color-bg-card);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
@@ -236,17 +220,14 @@ body {
     visibility: hidden;
     transform: translateY(-10px);
     transition: all var(--transition-base);
-    display: none;
-    flex-direction: column;
-    pointer-events: none;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .project-panel.active {
     opacity: 1;
     visibility: visible;
     transform: translateY(0);
-    display: flex;
-    pointer-events: auto;
 }
 
 .project-panel-header {
@@ -258,9 +239,30 @@ body {
 }
 
 .project-panel-header h3 {
-    font-size: 1rem;
+    font-size: 1.125rem;
     font-weight: 600;
     color: var(--color-text-primary);
+}
+
+.current-project-display {
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--color-bg-tertiary);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.current-project-display .current-label {
+    font-size: 0.75rem;
+    color: var(--color-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.current-project-display .current-name {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--color-primary-light);
 }
 
 .project-list {
