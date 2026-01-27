@@ -17,14 +17,10 @@
 
 <body>
     <!-- Project Selector -->
-    <div class="project-selector">
-        <button class="project-selector-btn" id="projectSelectorBtn" onclick="toggleProjectPanel()">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+    <div class="project-controls">
+        <button class="project-toggle-btn" id="projectToggleBtn" onclick="toggleProjectPanel()" title="Switch Project">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                 <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            <span class="project-name" id="currentProjectName">My Book</span>
-            <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none">
-                <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
         </button>
 
@@ -32,6 +28,10 @@
             <div class="project-panel-header">
                 <h3>Your Projects</h3>
                 <button class="panel-close-btn" onclick="toggleProjectPanel()">×</button>
+            </div>
+            <div class="current-project-display">
+                <span class="current-label">Current:</span>
+                <span class="current-name" id="currentProjectName">My Book</span>
             </div>
             <div class="project-list" id="projectList">
                 <!-- Projects will be populated by JavaScript -->

@@ -135,10 +135,7 @@ function deleteProject(projectId, event) {
 // Toggle project panel
 function toggleProjectPanel() {
     const panel = document.getElementById('projectPanel');
-    const selector = document.querySelector('.project-selector');
-
     panel.classList.toggle('active');
-    selector.classList.toggle('open');
 
     if (panel.classList.contains('active')) {
         renderProjectList();
@@ -184,12 +181,11 @@ function hideNewProjectDialog() {
 
 // Close project panel when clicking outside
 document.addEventListener('click', (e) => {
-    const selector = document.querySelector('.project-selector');
+    const projectControls = document.querySelector('.project-controls');
     const panel = document.getElementById('projectPanel');
 
-    if (selector && !selector.contains(e.target) && panel.classList.contains('active')) {
+    if (projectControls && !projectControls.contains(e.target) && panel.classList.contains('active')) {
         panel.classList.remove('active');
-        selector.classList.remove('open');
     }
 });
 
