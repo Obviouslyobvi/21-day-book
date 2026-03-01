@@ -5,9 +5,10 @@ name = "nonfiction-blueprint"
 compatibility_date = "2024-12-01"
 
 # The directory containing your static assets
-# Cloudflare Pages serves files from public/ by default
+# Files are at repo root for GitHub Pages compatibility
+# Change to "./public" if you move to Cloudflare Pages with a subfolder
 [site]
-bucket = "./public"
+bucket = "./"
 
 # Environment variables (set these in Cloudflare Dashboard > Settings > Environment Variables)
 # STRIPE_SECRET_KEY = "sk_live_..."
